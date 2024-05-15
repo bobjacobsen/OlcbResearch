@@ -791,7 +791,7 @@ paired with proposed TN language:
     not require that the CAN frames be sent with no inter-frame idle time.
     It's strongly recommended that the frames be sent with no inter-frame idle time, because
     that can reduce and simplify buffering requirements even further, but that
-    is not required.” 
+    is not required by this Standard.” 
 \end{quote}
 
 See the following section for discussion of a stronger requirement for 
@@ -999,15 +999,14 @@ discussion of what to expect.
 Some nodes might only process EWP messages due to some particular protocol
 which provides context for the EWP message's length and rate.  
 Absent that, only general statements can be made such as:
+\cbstart
 \begin{quote}
-    ``Although the most probable collision case is that an EWP message will only overlap
+    ``Implementors should assume that EWP messages may overlap. 
+    Although the most probable collision case is that an EWP message will only overlap
     with one other EWP message, this cannot be assumed in general.
-    Absent any guidance from specific protocols that are defining the 
-    use of EWP messages, implementors should assume that as many as
-    six EWP messages may overlap. Best practice is to allow for variable
-    buffering up to the available node memory.""
+    Best practice is to allow for variable buffering up to the available node memory.''
 \end{quote}
-
+\cbend
 Note that this would be more concrete if the EWP protocol itself
 put a maximum length on the message payload
 so that buffer calculations can be based on that as a worst case.
