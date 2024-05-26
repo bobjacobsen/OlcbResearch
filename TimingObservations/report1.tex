@@ -8,12 +8,22 @@
 \usepackage{epstopdf}
 \usepackage{lscape}
 \usepackage{hyperref}
+
+\usepackage{changebar}
+% disable display of changebars
+%\nochangebars
+
+% make figure and table captions narrower than the full page
+\usepackage{caption}
+\captionsetup{width=0.8\textwidth}
+
+
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
 % common header content elements
 \title{Observations About OpenLCB CAN Timing}
 \author{Bob Jacobsen}
-\date{March 24, 2024}                                         % Activate to display a given date or no date
+\date{May 26, 2024}                                         % Activate to display a given date or no date
 
 \begin{document}
 \maketitle
@@ -38,7 +48,12 @@ JMRI PanelPro connected via an LCC-Buffer USB,
 an RR-Cirkits Tower-LCC,
 and an SPROG DCC Ltd. SERVOIO-LCC
 to try to shed some light on 
-current behavior in this area.
+current behavior in this 
+area.\footnote{
+The original version of this note was dated March 24, 2024. This
+version includes an update, marked by change bars, to the new
+version 1.5 of the SPROG SERVO-IO firmware.
+}
 
 \section{Measurement Setup}
 
@@ -112,9 +127,10 @@ It was connected to the OpenLCB CAN bus using an LCC Buffer-USB.
 
 \subsection{SPROG DCC Ltd. SERVOIO-LCC}
 
+\cbstart
 This self-identifies as hardware version 1.0
-and software version 1.1.
-
+and software version 1.5.
+\cbend
 \section{Measurements}
 
 \subsection{Single SNIP Interaction}
@@ -132,17 +148,20 @@ Device &  Typical Reply Time & Typical Interframe Time\\
 CS-105   &  10 ms & 0\us \\
 JMRI   &  1.2 ms & 0\us \\
 Tower-LCC   &  0.4 ms & 12 - 20 \us \\
-SERVOIO-LCC   &  1 - 4 ms & 2.8 ms \\
+\cbstart SERVOIO-LCC   &  0.8-1.2 ms & 0\us \cbend \\
 \hline
 \end{tabular}
 \end{center}
 
 To summarize, all four devices have enough delay 
 between receiving a request and sending the response
-for another packet to be put on the CAN bus. The CS-105 and JMRI 
-reply without inter-frame delays while the Tower-LCC and SERVOIO-LCC
-have an additional delay between reply frames that would
+for another packet to be put on the CAN bus. 
+\cbstart
+The CS-105, JMRI and SERVIO-LCC
+reply without inter-frame delays while the Tower-LCC
+has an additional delay between reply frames that would
 allow a lower-priority frame to be inserted.
+\cbend
 
 \begin{figure}[!htbp]
 \centering
@@ -198,7 +217,7 @@ inter-frame delay.}
 \end{figure}
 
 
-
+\cbstart
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{1SNIP_SPROG_Start_delay_1_140}
@@ -214,6 +233,7 @@ precision on the reply time measurement.}
 \caption{Interframe delay of SERVOIO-LCC reply.}
 \label{fig:single_SERVOIO_SNIP_interframe}
 \end{figure}
+\cbend
 
 \clearpage
 
@@ -246,8 +266,6 @@ frame.
     normally retransmit the SNIP request on receipt
     of a OIR addressed to it with a non-permanent error code; 
     what other control programs do is unknown at present.
-    Note that this OIR carries a 0x1000 permanent error code;
-    this has been pointed out to the vendor.
 }
 See Figure \ref{fig:SERVOIO_double_SNIP_reply_sequence} for more detail on this.
 
@@ -266,24 +284,25 @@ The interframe time between the first and second reply frame is measured at 16\u
 \label{fig:double_TWR_SNIP_interframe}
 \end{figure}
 
-
+\cbstart
 \begin{figure}[!htbp]
 \begin{verbatim}
-46.235: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+03.662: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
                 SimpleNodeIdentInfoRequest with no payload
-46.236: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+03.663: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00
                 SimpleNodeIdentInfoRequest with no payload
-46.237: [[19a0881c] 10 31 04 53 50 52 4F 47]  R: SNIP Reply 1st frame
-46.242: [[1906881c] 00 31 10 00 0D E8      ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-                OptionalInteractionRejected with payload 0D E8 10 00 
-                Optional Interaction Rejected for MTI 0xDE8 code 0x1000
-46.243: [[19a0881c] 30 31 20 44 43 43 20 4C]  R: SNIP Reply middle frame
-46.246: [[19a0881c] 30 31 74 64 00 53 45 52]  R: SNIP Reply middle frame
-46.250: [[19a0881c] 30 31 56 4F 49 4F 2D 4C]  R: SNIP Reply middle frame
-46.254: [[19a0881c] 30 31 43 43 00 31 2E 30]  R: SNIP Reply middle frame
-46.258: [[19a0881c] 30 31 00 31 2E 31 00 02]  R: SNIP Reply middle frame
-46.262: [[19a0881c] 20 31 00 00            ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-                Simple Node Ident Info with content '4,SPROG DCC Ltd,SERVOIO-LCC,1.0,1.1,2,,,'
+03.664: [[19a0881c] 10 31 04 53 50 52 4F 47]  R: SNIP Reply 1st frame
+03.666: [[1906881c] 00 31 20 00 0D E8      ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                OptionalInteractionRejected with payload 20 00 0D E8 
+                Optional Interaction Rejected for MTI 0xDE8 code 0x2000
+03.666: [[19a0881c] 30 31 20 44 43 43 20 4C]  R: SNIP Reply middle frame
+03.668: [[19a0881c] 30 31 74 64 00 53 45 52]  R: SNIP Reply middle frame
+03.669: [[19a0881c] 30 31 56 4F 49 4F 2D 4C]  R: SNIP Reply middle frame
+03.670: [[19a0881c] 30 31 43 43 00 31 2E 30]  R: SNIP Reply middle frame
+03.671: [[19a0881c] 30 31 00 31 2E 35 00 02]  R: SNIP Reply middle frame
+03.672: [[19a0881c] 20 31 00 00            ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                Simple Node Ident Info 
+                with content '4,SPROG DCC Ltd,SERVOIO-LCC,1.0,1.5,2,,,'
 
 \end{verbatim}
 \caption{SERVOIO-LCC double-SNIP sequence. The SERVOIO-LCC starts to reply to the 1\ts{st}
@@ -291,7 +310,7 @@ The interframe time between the first and second reply frame is measured at 16\u
         2\ts{nd} request.}
 \label{fig:SERVOIO_double_SNIP_reply_sequence}
 \end{figure}
-
+\cbend
 
 \clearpage
 
@@ -343,7 +362,8 @@ followed by the rest of the SNIP reply frames.
 50.212: [[19a08300] 30 31 20 43 6F 6D 6D 61]  R: SNIP Reply middle frame
 50.213: [[19a08300] 30 31 6E 64 20 53 74 61]  R: SNIP Reply middle frame
 50.214: [[19a08300] 20 31 74 69 6F 6E 00   ]  R: 09.00.99.03.00.35 - 03.00.00.00.00.01 
-    Simple Node Ident Info with content '4,Train Control Systems (TCS),CS-105,Rev E,1.00,2,TCS CS-105, S/N 0035,TCS Command Station,'
+    Simple Node Ident Info 
+    with content '4,Train Control Systems (TCS),CS-105,Rev E,1.00,2,TCS CS-105, S/N 0035,TCS Command Station,'
 \end{verbatim}
 \caption{CS-105 SNIP, PIP reply packet sequence}
 \label{fig:CS105_SNIP_PIP_reply_sequence}
@@ -372,32 +392,36 @@ followed by the rest of the SNIP reply frames.
 06.626: [[19a08541] 30 31 75 72 6E 6F 75 74]  R: SNIP Reply middle frame
 06.627: [[19a08541] 30 31 20 6F 77 6E 65 72]  R: SNIP Reply middle frame
 06.628: [[19a08541] 20 31 2E 20 54 57 52 00]  R: 02.01.57.00.04.9D - 03.00.00.00.00.01 
-    Simple Node Ident Info with content '4,RR-CirKits, Inc.,Tower-LCC,rev-D,rev-C7e,2,ZionE turnouts 1st 24-01-04,Turnout owner. TWR,'
+    Simple Node Ident Info 
+    with content '4,RR-CirKits, Inc.,Tower-LCC,rev-D,rev-C7e,2,ZionE turnouts 1st 24-01-04,Turnout owner. TWR,'
 \end{verbatim}
 \caption{TowerLCC SNIP, PIP reply packet sequence}
 \label{fig:TWR_SNIP_PIP_reply_sequence}
 \end{figure}
 
+\cbstart
 \begin{figure}[!htbp]
 \begin{verbatim}
-32.048: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
-    SimpleNodeIdentInfoRequest with no payload
-32.048: [[19828031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
-    ProtocolSupportInquiry with no payload
-32.052: [[19a0881c] 10 31 04 53 50 52 4F 47]  R: SNIP Reply 1st frame
-32.057: [[1966881c] 00 31 D4 58 20 00 00 00]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-    ProtocolSupportReply with payload D4 58 20 00 00 00
-32.058: [[19a0881c] 30 31 20 44 43 43 20 4C]  R: SNIP Reply middle frame
-32.061: [[19a0881c] 30 31 74 64 00 53 45 52]  R: SNIP Reply middle frame
-32.065: [[19a0881c] 30 31 56 4F 49 4F 2D 4C]  R: SNIP Reply middle frame
-32.069: [[19a0881c] 30 31 43 43 00 31 2E 30]  R: SNIP Reply middle frame
-32.073: [[19a0881c] 30 31 00 31 2E 31 00 02]  R: SNIP Reply middle frame
-32.077: [[19a0881c] 20 31 00 00            ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-    Simple Node Ident Info with content '4,SPROG DCC Ltd,SERVOIO-LCC,1.0,1.1,2,,,'
+21.065: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+                SimpleNodeIdentInfoRequest with no payload
+21.066: [[19828031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+                ProtocolSupportInquiry with no payload
+21.067: [[19a0881c] 10 31 04 53 50 52 4F 47]  R: SNIP Reply 1st frame
+21.069: [[1966881c] 00 31 54 58 20 00 00 00]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                ProtocolSupportReply with payload 54 58 20 00 00 00
+21.071: [[19a0881c] 30 31 20 44 43 43 20 4C]  R: SNIP Reply middle frame
+21.071: [[19a0881c] 30 31 74 64 00 53 45 52]  R: SNIP Reply middle frame
+21.072: [[19a0881c] 30 31 56 4F 49 4F 2D 4C]  R: SNIP Reply middle frame
+21.073: [[19a0881c] 30 31 43 43 00 31 2E 30]  R: SNIP Reply middle frame
+21.074: [[19a0881c] 30 31 00 31 2E 35 00 02]  R: SNIP Reply middle frame
+21.075: [[19a0881c] 20 31 00 00            ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                Simple Node Ident Info 
+                with content '4,SPROG DCC Ltd,SERVOIO-LCC,1.0,1.5,2,,,'
 \end{verbatim}
 \caption{SERVOIO-LCC SNIP, PIP reply packet sequence}
 \label{fig:SERVOIO_SNIP_PIP_reply_sequence}
 \end{figure}
+\cbend
 
 \clearpage
 
@@ -525,35 +549,35 @@ Note that there is no reply to the third SNIP request.}
 \label{fig:TWR_Triple_SNIP_reply_sequence}
 \end{figure}
 
-
+\cbstart
 \begin{figure}[!htbp]
 \begin{verbatim}
-08.640: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
-    SimpleNodeIdentInfoRequest with no payload
-08.641: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
-    SimpleNodeIdentInfoRequest with no payload
-08.641: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
-    SimpleNodeIdentInfoRequest with no payload
-08.645: [[19a0881c] 10 31 04 53 50 52 4F 47]  R: SNIP Reply 1st frame
-08.649: [[1906881c] 00 31 10 00 0D E8      ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-    OptionalInteractionRejected with payload 0D E8 10 00 
-    Optional Interaction Rejected for MTI 0xDE8 code 0x1000
-08.651: [[19a0881c] 30 31 20 44 43 43 20 4C]  R: SNIP Reply middle frame
-08.654: [[1906881c] 00 31 10 00 0D E8      ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-    OptionalInteractionRejected with payload 0D E8 10 00 
-    Optional Interaction Rejected for MTI 0xDE8 code 0x1000
-08.656: [[19a0881c] 30 31 74 64 00 53 45 52]  R: SNIP Reply middle frame
-08.658: [[19a0881c] 30 31 56 4F 49 4F 2D 4C]  R: SNIP Reply middle frame
-08.662: [[19a0881c] 30 31 43 43 00 31 2E 30]  R: SNIP Reply middle frame
-08.666: [[19a0881c] 30 31 00 31 2E 31 00 02]  R: SNIP Reply middle frame
-08.670: [[19a0881c] 20 31 00 00            ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-    Simple Node Ident Info with content '4,SPROG DCC Ltd,SERVOIO-LCC,1.0,1.1,2,,,'
+02.120: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+                SimpleNodeIdentInfoRequest with no payload
+02.120: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+                SimpleNodeIdentInfoRequest with no payload
+02.121: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+                SimpleNodeIdentInfoRequest with no payload
+02.123: [[19a0881c] 10 31 04 53 50 52 4F 47]  R: SNIP Reply 1st frame
+02.123: [[1906881c] 00 31 20 00 0D E8      ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                OptionalInteractionRejected with payload 20 00 0D E8 
+                Optional Interaction Rejected for MTI 0xDE8 code 0x2000
+02.125: [[19a0881c] 30 31 20 44 43 43 20 4C]  R: SNIP Reply middle frame
+02.126: [[1906881c] 00 31 20 00 0D E8      ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                OptionalInteractionRejected with payload 20 00 0D E8 
+                Optional Interaction Rejected for MTI 0xDE8 code 0x2000
+02.126: [[19a0881c] 30 31 74 64 00 53 45 52]  R: SNIP Reply middle frame
+02.128: [[19a0881c] 30 31 56 4F 49 4F 2D 4C]  R: SNIP Reply middle frame
+02.129: [[19a0881c] 30 31 43 43 00 31 2E 30]  R: SNIP Reply middle frame
+02.130: [[19a0881c] 30 31 00 31 2E 35 00 02]  R: SNIP Reply middle frame
+02.131: [[19a0881c] 20 31 00 00            ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                Simple Node Ident Info with content '4,SPROG DCC Ltd,SERVOIO-LCC,1.0,1.5,2,,,'
 \end{verbatim}
 \caption{SERVOIO-LCC triple SNIP reply packet sequence.
 Note that the 2nd two requests receive OIR replies}
 \label{fig:SERVOIO_Triple_SNIP_reply_sequence}
 \end{figure}
-
+\cbend
 
 
 
@@ -707,31 +731,34 @@ See Figure \ref{fig:SERVOIO_SNIP2PIP_reply_sequence} for more detail on this.
 \label{fig:TWR_SNIP2PIP_reply_sequence}
 \end{figure}
 
+\cbstart
 \begin{figure}[!htbp]
 \begin{verbatim}
-17:13:50.155: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
-    SimpleNodeIdentInfoRequest with no payload
-17:13:50.156: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
-    SimpleNodeIdentInfoRequest with no payload
-17:13:50.157: [[19828031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
-    ProtocolSupportInquiry with no payload
-17:13:50.160: [[19a0881c] 10 31 04 53 50 52 4F 47]  R: SNIP Reply 1st frame
-17:13:50.164: [[1906881c] 00 31 10 00 0D E8      ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-    OptionalInteractionRejected with payload 0D E8 10 00 
-    Optional Interaction Rejected for MTI 0xDE8 code 0x1000
-17:13:50.166: [[19a0881c] 30 31 20 44 43 43 20 4C]  R: SNIP Reply middle frame
-17:13:50.169: [[1966881c] 00 31 D4 58 20 00 00 00]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-    ProtocolSupportReply with payload D4 58 20 00 00 00
-17:13:50.170: [[19a0881c] 30 31 74 64 00 53 45 52]  R: SNIP Reply middle frame
-17:13:50.173: [[19a0881c] 30 31 56 4F 49 4F 2D 4C]  R: SNIP Reply middle frame
-17:13:50.177: [[19a0881c] 30 31 43 43 00 31 2E 30]  R: SNIP Reply middle frame
-17:13:50.181: [[19a0881c] 30 31 00 31 2E 31 00 02]  R: SNIP Reply middle frame
-17:13:50.185: [[19a0881c] 20 31 00 00            ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
-    Simple Node Ident Info with content '4,SPROG DCC Ltd,SERVOIO-LCC,1.0,1.1,2,,,'
+37.712: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+                SimpleNodeIdentInfoRequest with no payload
+37.713: [[19de8031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+                SimpleNodeIdentInfoRequest with no payload
+37.714: [[19828031] 08 1C                  ]  R: 03.00.00.00.00.01 - 02.01.2C.01.09.00 
+                ProtocolSupportInquiry with no payload
+37.715: [[19a0881c] 10 31 04 53 50 52 4F 47]  R: SNIP Reply 1st frame
+37.716: [[1906881c] 00 31 20 00 0D E8      ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                OptionalInteractionRejected with payload 20 00 0D E8 
+                Optional Interaction Rejected for MTI 0xDE8 code 0x2000
+37.717: [[19a0881c] 30 31 20 44 43 43 20 4C]  R: SNIP Reply middle frame
+37.718: [[1966881c] 00 31 54 58 20 00 00 00]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                ProtocolSupportReply with payload 54 58 20 00 00 00
+37.719: [[19a0881c] 30 31 74 64 00 53 45 52]  R: SNIP Reply middle frame
+37.720: [[19a0881c] 30 31 56 4F 49 4F 2D 4C]  R: SNIP Reply middle frame
+37.721: [[19a0881c] 30 31 43 43 00 31 2E 30]  R: SNIP Reply middle frame
+37.722: [[19a0881c] 30 31 00 31 2E 35 00 02]  R: SNIP Reply middle frame
+37.723: [[19a0881c] 20 31 00 00            ]  R: 02.01.2C.01.09.00 - 03.00.00.00.00.01 
+                Simple Node Ident Info 
+                with content '4,SPROG DCC Ltd,SERVOIO-LCC,1.0,1.5,2,,,'
 \end{verbatim}
 \caption{SERVOIO-LCC SNIP, SNIP, PIP reply packet sequence.}
 \label{fig:SERVOIO_SNIP2PIP_reply_sequence}
 \end{figure}
+\cbend
 
 \clearpage
 
@@ -751,9 +778,10 @@ requests to arrive and need buffer space during the reply.
 In the extremely unlikely case of three requests arriving within a few milliseconds, one
 of them would be lost.
 
-The SPROG DCC Ltd. SERVOIO-LCC replies several milliseconds after receipt of a 
-request.  The frames of each reply are consistently spaced about 2.8 ms
-apart, allowing other requests to arbitrate onto the CAN bus in between them.
+The SPROG DCC Ltd. SERVOIO-LCC replies about a millisecond after receipt of a 
+request.  
+It sends the frames of an individual reply
+at line speed, preventing a lower-priority request from arriving during the reply.
 Instead of buffering multiple SNIP requests, the SERVOIO-LCC rejects additional
 overlapping SNIP requests with an 
 Optional Interaction Rejected (OIR) message that 
