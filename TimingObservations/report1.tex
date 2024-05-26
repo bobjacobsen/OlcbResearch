@@ -148,7 +148,7 @@ Device &  Typical Reply Time & Typical Interframe Time\\
 CS-105   &  10 ms & 0\us \\
 JMRI   &  1.2 ms & 0\us \\
 Tower-LCC   &  0.4 ms & 12 - 20 \us \\
-\cbstart SERVOIO-LCC   &  0.8-1.2 ms & 0\us \cbend \\
+\cbstart SERVOIO-LCC   &  0.6-1.0 ms & 0\us \cbend \\
 \hline
 \end{tabular}
 \end{center}
@@ -778,10 +778,12 @@ requests to arrive and need buffer space during the reply.
 In the extremely unlikely case of three requests arriving within a few milliseconds, one
 of them would be lost.
 
-The SPROG DCC Ltd. SERVOIO-LCC replies about a millisecond after receipt of a 
+\cbstart
+The SPROG DCC Ltd. SERVOIO-LCC replies about 0.6 to 1.0 milliseconds after receipt of a 
 request.  
 It sends the frames of an individual reply
 at line speed, preventing a lower-priority request from arriving during the reply.
+\cbend
 Instead of buffering multiple SNIP requests, the SERVOIO-LCC rejects additional
 overlapping SNIP requests with an 
 Optional Interaction Rejected (OIR) message that 
